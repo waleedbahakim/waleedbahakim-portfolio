@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
-import { ArrowUpRight, ArrowRight, Github, Linkedin, Mail, MapPin, Copy, Check, Search, Sun, Moon } from "lucide-react";
+import { ArrowUpRight, ArrowRight, Github, Linkedin, Mail, MapPin, Copy, Check, Search, Sun, Moon, Pencil, Terminal } from "lucide-react";
 
 /* =====================================================================
    WALEED BAHAKIM  ·  PORTFOLIO  ·  concept: "The Drawing Set"
@@ -375,6 +375,31 @@ html{scroll-behavior:smooth;}
 .also{ display:flex; align-items:center; gap:.7rem; flex-wrap:wrap; margin-top:1.6rem; font-family:var(--mono); font-size:.72rem; color:var(--muted); letter-spacing:.04em; }
 .also b{ color:var(--paper-2); border:1px solid var(--line-2); padding:.25rem .55rem; font-weight:500; }
 
+/* interactive play cell (sketch ⇄ terminal) */
+.card--play{ grid-column:span 2; cursor:default; }
+.card--play:hover{ background:var(--ink); }
+.play-top{ display:flex; align-items:center; justify-content:space-between; gap:1rem; flex-wrap:wrap; }
+.play-tabs{ display:inline-flex; gap:.4rem; }
+.play-tab{ display:inline-flex; align-items:center; gap:.4rem; font-family:var(--mono); font-size:.64rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:transparent; border:1px solid var(--line-2); padding:.34rem .6rem; cursor:pointer; transition:border-color .2s, color .2s; }
+.play-tab:hover{ color:var(--paper); border-color:var(--line-3); }
+.play-tab.on{ color:var(--signal); border-color:var(--signal); }
+.play-hint{ font-family:var(--mono); font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-2); }
+.play-pane{ display:flex; flex-direction:column; flex:1; min-height:180px; margin-top:.85rem; }
+.play-pane[hidden]{ display:none; }
+.play-foot{ display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.7rem; font-family:var(--mono); font-size:.58rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-2); }
+.play-btn{ font-family:var(--mono); font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:transparent; border:1px solid var(--line-2); padding:.32rem .6rem; cursor:pointer; transition:border-color .2s, color .2s; }
+.play-btn:hover{ border-color:var(--signal); color:var(--signal); }
+.sketch-canvas{ flex:1; min-height:160px; width:100%; display:block; cursor:crosshair; touch-action:none;
+  border:1px solid var(--line-2); background-image:radial-gradient(var(--line-2) 1px,transparent 1px); background-size:16px 16px; background-position:-1px -1px; }
+.term-body{ flex:1; min-height:160px; overflow-y:auto; border:1px solid var(--line-2); background:rgba(0,0,0,.14); padding:.7rem .8rem;
+  font-family:var(--mono); font-size:.74rem; line-height:1.65; color:var(--paper-2); cursor:text; }
+.pf[data-theme="light"] .term-body{ background:rgba(20,32,46,.05); }
+.term-line{ white-space:pre-wrap; word-break:break-word; }
+.term-line--cmd{ color:var(--paper); }
+.term-ps{ color:var(--signal); }
+.term-input-row{ display:flex; align-items:center; gap:.4rem; }
+.term-input{ flex:1; min-width:0; background:transparent; border:none; outline:none; color:var(--paper); font-family:var(--mono); font-size:.74rem; caret-color:var(--signal); padding:0; }
+
 /* stack */
 .stack-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:1px; background:var(--line-2); border:1px solid var(--line-2); }
 .stack-cell{ background:var(--ink); padding:clamp(1.3rem,3vw,2rem); }
@@ -422,6 +447,7 @@ html{scroll-behavior:smooth;}
   .cmdk-hint{ display:none; }
   .about-grid{ grid-template-columns:1fr; }
   .grid3{ grid-template-columns:1fr; }
+  .card--play{ grid-column:auto; }
   .stack-grid{ grid-template-columns:1fr; }
   .metrics-in{ grid-template-columns:repeat(2,1fr); }
   .metric:nth-child(2){ border-right:none; }
@@ -466,8 +492,16 @@ export default function Portfolio() {
       return "dark";
     }
   });
+  const [playMode, setPlayMode] = useState("sketch");
+  const [termLines, setTermLines] = useState(() => [
+    { p: false, t: "Waleed Bahakim — interactive shell. Type 'help' to look around." },
+  ]);
+  const [termInput, setTermInput] = useState("");
   const heroRef = useRef(null);
   const progRef = useRef(null);
+  const sketchRef = useRef(null);
+  const termInputRef = useRef(null);
+  const termBodyRef = useRef(null);
 
   // live IST clock for the title block
   useEffect(() => {
@@ -543,6 +577,97 @@ export default function Portfolio() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [palette, pidx]);
+
+  // interactive blueprint sketchpad (canvas drawing) — drawing survives flips
+  useEffect(() => {
+    const canvas = sketchRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+    let drawing = false, lastX = 0, lastY = 0, ink = "#FF6A2B";
+    const fit = () => {
+      const r = canvas.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const w = Math.round(r.width * dpr), h = Math.round(r.height * dpr);
+      if (canvas.width === w && canvas.height === h) return;
+      canvas.width = w; canvas.height = h;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.lineCap = "round"; ctx.lineJoin = "round"; ctx.lineWidth = 2.4;
+    };
+    fit();
+    const ro = new ResizeObserver(fit);
+    ro.observe(canvas);
+    const at = (e) => {
+      const r = canvas.getBoundingClientRect();
+      return [e.clientX - r.left, e.clientY - r.top];
+    };
+    const down = (e) => {
+      drawing = true;
+      ink = (getComputedStyle(canvas).getPropertyValue("--signal") || "#FF6A2B").trim() || "#FF6A2B";
+      [lastX, lastY] = at(e);
+      try { canvas.setPointerCapture(e.pointerId); } catch (_) {}
+    };
+    const move = (e) => {
+      if (!drawing) return;
+      const [x, y] = at(e);
+      ctx.strokeStyle = ink;
+      ctx.beginPath();
+      ctx.moveTo(lastX, lastY);
+      ctx.lineTo(x, y);
+      ctx.stroke();
+      lastX = x; lastY = y;
+    };
+    const up = () => { drawing = false; };
+    canvas.addEventListener("pointerdown", down);
+    canvas.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      ro.disconnect();
+      canvas.removeEventListener("pointerdown", down);
+      canvas.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    };
+  }, []);
+
+  const clearSketch = () => {
+    const canvas = sketchRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (ctx) ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // terminal: keep scrolled to the latest line, focus the input when opened
+  useEffect(() => {
+    const el = termBodyRef.current;
+    if (el && playMode === "terminal") el.scrollTop = el.scrollHeight;
+  }, [termLines, playMode]);
+  useEffect(() => {
+    if (playMode === "terminal") termInputRef.current?.focus({ preventScroll: true });
+  }, [playMode]);
+
+  const runTerm = (raw) => {
+    const cmd = raw.trim().toLowerCase();
+    if (!cmd) { setTermLines((prev) => [...prev, { p: true, t: "" }]); return; }
+    if (cmd === "clear") { setTermLines([]); return; }
+    let out;
+    switch (cmd) {
+      case "help": out = ["commands: about · work · stack · resume · contact · social · clear"]; break;
+      case "about": out = ["Full-stack developer (MERN + GenAI) who ships production software, front to back."]; break;
+      case "whoami": out = ["waleed — full-stack engineer · Aurangabad, India"]; break;
+      case "work": out = ["01 CBVI · 02 Kriya · 03 EStyleWala · 04 StudyRevise · 05 Ikhlaas", "(scroll up to the Work sheet for the details)"]; break;
+      case "stack": out = ["React · Next.js · Node · NestJS · Python · Mongo · Postgres · Redis · AI (OpenAI/Gemini/Claude)"]; break;
+      case "resume": case "cv": out = ["opening resume.pdf …"]; window.open("/Waleed_Bahakim_Resume.pdf", "_blank", "noopener"); break;
+      case "contact": out = ["email · bahakimwaleed08@gmail.com"]; break;
+      case "social": out = ["github.com/waleedbahakim", "linkedin.com/in/waleed-bahakim-890381227"]; break;
+      case "ls": out = ["about  work  stack  resume  contact  social"]; break;
+      case "hi": case "hello": out = ["hey 👋 — type 'help' to look around"]; break;
+      default: out = [`command not found: ${cmd} — try 'help'`];
+    }
+    setTermLines((prev) => [...prev, { p: true, t: raw }, ...out.map((t) => ({ p: false, t }))]);
+  };
 
   const onHeroMove = (e) => {
     const el = heroRef.current;
@@ -835,6 +960,52 @@ export default function Portfolio() {
                 <div className="card card--nolink" key={p.no} data-reveal>{body}</div>
               );
             })}
+
+            {/* interactive play cell — flip between sketch & terminal; fills the open grid cells */}
+            <div className="card card--play" data-reveal>
+              <div className="play-top">
+                <div className="play-tabs" role="tablist" aria-label="Mini playground">
+                  <button type="button" role="tab" aria-selected={playMode === "sketch"} className={"play-tab" + (playMode === "sketch" ? " on" : "")} onClick={() => setPlayMode("sketch")}>
+                    <Pencil size={12} /> Sketch
+                  </button>
+                  <button type="button" role="tab" aria-selected={playMode === "terminal"} className={"play-tab" + (playMode === "terminal" ? " on" : "")} onClick={() => setPlayMode("terminal")}>
+                    <Terminal size={12} /> Terminal
+                  </button>
+                </div>
+                <span className="play-hint">{playMode === "sketch" ? "drag to draw" : "type a command"}</span>
+              </div>
+
+              <div className="play-pane" hidden={playMode !== "sketch"}>
+                <canvas ref={sketchRef} className="sketch-canvas" aria-label="Blueprint sketchpad — drag to draw" />
+                <div className="play-foot">
+                  <span>Orange markup ink · it's a drawing set</span>
+                  <button className="play-btn" type="button" onClick={clearSketch}>Clear</button>
+                </div>
+              </div>
+
+              <div className="play-pane" hidden={playMode !== "terminal"}>
+                <div className="term-body" ref={termBodyRef} onClick={() => termInputRef.current?.focus({ preventScroll: true })}>
+                  {termLines.map((l, i) => (
+                    <div key={i} className={"term-line" + (l.p ? " term-line--cmd" : "")}>
+                      {l.p && <span className="term-ps">wb@portfolio:~$</span>}{l.p ? " " : ""}{l.t}
+                    </div>
+                  ))}
+                  <div className="term-input-row">
+                    <span className="term-ps">wb@portfolio:~$</span>
+                    <input
+                      ref={termInputRef}
+                      className="term-input"
+                      value={termInput}
+                      onChange={(e) => setTermInput(e.target.value)}
+                      onKeyDown={(e) => { if (e.key === "Enter") { runTerm(termInput); setTermInput(""); } }}
+                      spellCheck={false}
+                      autoComplete="off"
+                      aria-label="Terminal input"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="also" data-reveal>
