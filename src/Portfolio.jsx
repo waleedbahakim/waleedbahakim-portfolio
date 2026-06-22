@@ -424,7 +424,8 @@ html{scroll-behavior:smooth;}
   .metrics-in{ grid-template-columns:repeat(2,1fr); }
   .metric:nth-child(2){ border-right:none; }
   .metric:nth-child(1),.metric:nth-child(2){ border-bottom:1px solid var(--line); }
-  .titleblock{ position:static; width:100%; margin-top:2.5rem; }
+  .hero{ display:block; }
+  .titleblock{ position:static; width:100%; max-width:420px; margin-top:2.5rem; }
   .foot-in{ grid-template-columns:repeat(2,1fr); }
   .foot-cell:nth-child(2){ border-right:none; }
   .foot-cell{ border-bottom:1px solid var(--line); }
