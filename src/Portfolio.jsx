@@ -384,14 +384,15 @@ html{scroll-behavior:smooth;}
 .play-tab:hover{ color:var(--paper); border-color:var(--line-3); }
 .play-tab.on{ color:var(--signal); border-color:var(--signal); }
 .play-hint{ font-family:var(--mono); font-size:.58rem; letter-spacing:.1em; text-transform:uppercase; color:var(--muted-2); }
-.play-pane{ display:flex; flex-direction:column; flex:1; min-height:180px; margin-top:.85rem; }
+.play-pane{ display:flex; flex-direction:column; flex:1; min-height:0; margin-top:.85rem; }
 .play-pane[hidden]{ display:none; }
 .play-foot{ display:flex; align-items:center; justify-content:space-between; gap:1rem; margin-top:.7rem; font-family:var(--mono); font-size:.58rem; letter-spacing:.06em; text-transform:uppercase; color:var(--muted-2); }
 .play-btn{ font-family:var(--mono); font-size:.6rem; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); background:transparent; border:1px solid var(--line-2); padding:.32rem .6rem; cursor:pointer; transition:border-color .2s, color .2s; }
 .play-btn:hover{ border-color:var(--signal); color:var(--signal); }
-.sketch-canvas{ flex:1; min-height:160px; width:100%; display:block; cursor:crosshair; touch-action:none;
+.sketch-wrap{ position:relative; flex:1; min-height:0;
   border:1px solid var(--line-2); background-image:radial-gradient(var(--line-2) 1px,transparent 1px); background-size:16px 16px; background-position:-1px -1px; }
-.term-body{ flex:1; min-height:160px; overflow-y:auto; border:1px solid var(--line-2); background:rgba(0,0,0,.14); padding:.7rem .8rem;
+.sketch-canvas{ position:absolute; inset:0; width:100%; height:100%; display:block; cursor:crosshair; touch-action:none; }
+.term-body{ flex:1; min-height:0; overflow-y:auto; border:1px solid var(--line-2); background:rgba(0,0,0,.14); padding:.7rem .8rem;
   font-family:var(--mono); font-size:.74rem; line-height:1.65; color:var(--paper-2); cursor:text; }
 .pf[data-theme="light"] .term-body{ background:rgba(20,32,46,.05); }
 .term-line{ white-space:pre-wrap; word-break:break-word; }
@@ -492,7 +493,7 @@ export default function Portfolio() {
       return "dark";
     }
   });
-  const [playMode, setPlayMode] = useState("sketch");
+  const [playMode, setPlayMode] = useState("terminal");
   const [termLines, setTermLines] = useState(() => [
     { p: false, t: "Waleed Bahakim — interactive shell. Type 'help' to look around." },
   ]);
@@ -502,6 +503,7 @@ export default function Portfolio() {
   const sketchRef = useRef(null);
   const termInputRef = useRef(null);
   const termBodyRef = useRef(null);
+  const termFirst = useRef(true);
 
   // live IST clock for the title block
   useEffect(() => {
@@ -645,25 +647,58 @@ export default function Portfolio() {
     if (el && playMode === "terminal") el.scrollTop = el.scrollHeight;
   }, [termLines, playMode]);
   useEffect(() => {
+    if (termFirst.current) { termFirst.current = false; return; } // don't grab focus on initial load
     if (playMode === "terminal") termInputRef.current?.focus({ preventScroll: true });
   }, [playMode]);
 
   const runTerm = (raw) => {
-    const cmd = raw.trim().toLowerCase();
+    const parts = raw.trim().toLowerCase().split(/\s+/);
+    const cmd = parts[0];
+    const arg = parts[1];
     if (!cmd) { setTermLines((prev) => [...prev, { p: true, t: "" }]); return; }
     if (cmd === "clear") { setTermLines([]); return; }
     let out;
     switch (cmd) {
-      case "help": out = ["commands: about · work · stack · resume · contact · social · clear"]; break;
+      case "help": out = ["commands: about · projects · work · stack · resume · contact · social · theme · clear"]; break;
       case "about": out = ["Full-stack developer (MERN + GenAI) who ships production software, front to back."]; break;
       case "whoami": out = ["waleed — full-stack engineer · Aurangabad, India"]; break;
-      case "work": out = ["01 CBVI · 02 Kriya · 03 EStyleWala · 04 StudyRevise · 05 Ikhlaas", "(scroll up to the Work sheet for the details)"]; break;
+      case "projects": out = [
+        "01 CBVI        → cbvi-web.vercel.app/login   (live)",
+        "02 Kriya       → kriya.xoft.in/login         (live)",
+        "03 EStyleWala  → vendor.estylewala.com       (live)",
+        "04 StudyRevise → case study soon",
+        "05 Ikhlaas     → case study soon",
+        "tip: 'open <name>' to launch one — e.g. open cbvi",
+      ]; break;
+      case "open": {
+        const urls = {
+          cbvi: "https://cbvi-web.vercel.app/login",
+          kriya: "https://kriya.xoft.in/login",
+          estylewala: "https://vendor.estylewala.com",
+          estyle: "https://vendor.estylewala.com",
+        };
+        if (!arg) { out = ["usage: open <project> — try 'projects' for the list"]; }
+        else if (urls[arg]) { window.open(urls[arg], "_blank", "noopener"); out = [`opening ${arg} …`]; }
+        else { out = [`no live link for '${arg}'. type 'projects'.`]; }
+        break;
+      }
+      case "work": out = ["scroll up to the Work sheet — or type 'projects' for live links"]; break;
       case "stack": out = ["React · Next.js · Node · NestJS · Python · Mongo · Postgres · Redis · AI (OpenAI/Gemini/Claude)"]; break;
       case "resume": case "cv": out = ["opening resume.pdf …"]; window.open("/Waleed_Bahakim_Resume.pdf", "_blank", "noopener"); break;
       case "contact": out = ["email · bahakimwaleed08@gmail.com"]; break;
       case "social": out = ["github.com/waleedbahakim", "linkedin.com/in/waleed-bahakim-890381227"]; break;
-      case "ls": out = ["about  work  stack  resume  contact  social"]; break;
+      case "theme": {
+        const target = arg === "light" || arg === "dark" ? arg : (theme === "dark" ? "light" : "dark");
+        setTheme(target);
+        out = [`switched to ${target} mode`];
+        break;
+      }
+      case "ls": out = ["about  projects  work  stack  resume  contact  social  theme"]; break;
       case "hi": case "hello": out = ["hey 👋 — type 'help' to look around"]; break;
+      case "sudo": out = ["nice try — you already have root on this site 😏"]; break;
+      case "coffee": out = ["☕ brewing… (though Waleed actually runs on chai)"]; break;
+      case "hire": out = ["📨 excellent taste. type 'contact' or 'resume' — let's build."]; break;
+      case "rm": out = ["whoa — nothing here is yours to delete 😄"]; break;
       default: out = [`command not found: ${cmd} — try 'help'`];
     }
     setTermLines((prev) => [...prev, { p: true, t: raw }, ...out.map((t) => ({ p: false, t }))]);
@@ -976,7 +1011,9 @@ export default function Portfolio() {
               </div>
 
               <div className="play-pane" hidden={playMode !== "sketch"}>
-                <canvas ref={sketchRef} className="sketch-canvas" aria-label="Blueprint sketchpad — drag to draw" />
+                <div className="sketch-wrap">
+                  <canvas ref={sketchRef} className="sketch-canvas" aria-label="Blueprint sketchpad — drag to draw" />
+                </div>
                 <div className="play-foot">
                   <span>Orange markup ink · it's a drawing set</span>
                   <button className="play-btn" type="button" onClick={clearSketch}>Clear</button>
