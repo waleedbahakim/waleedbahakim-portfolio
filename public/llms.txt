@@ -1,0 +1,32 @@
+# Waleed Bahakim
+
+> Full-stack developer (MERN + GenAI) based in Aurangabad, India. Builds production web apps end to end — React / Next.js front ends, Node.js + MongoDB back ends, with AI / LLM integrations woven through. Open to remote, onsite and freelance roles across the UAE, the GCC and worldwide.
+
+## About
+- Name: Waleed Bahakim
+- Role: Full-Stack Developer (MERN + GenAI)
+- Location: Aurangabad, India
+- Availability: Remote / Onsite / Freelance (UAE, GCC and worldwide)
+- Email: bahakimwaleed08@gmail.com
+- Experience: ~1.5+ years shipping production software for fast-moving startups and an international client.
+- Languages: English, Hindi, Urdu
+
+## Skills
+React, Next.js, TypeScript, JavaScript, Redux, Tailwind CSS, Node.js, Express, REST APIs, Socket.IO, MongoDB, MySQL, JWT, AWS, Docker, GCP, Firebase, CI/CD, GenAI, LLM integration (OpenAI, Gemini), Vision AI, prompt engineering, React Native, Expo, Flutter.
+
+## Experience
+- Fika AI Research — Full-Stack Developer (Jul 2025 – Present): builds client-facing dashboards and automation systems end to end (CallQC.AI, ConvergeIQ, ConsignFlow); integrates AI/LLM and Vision-AI services (OpenAI, Gemini); ships cloud-native apps on AWS with Docker.
+- CleverPe — Associate Software Developer, Intern (Dec 2024 – Jun 2025): built merchant, partner and admin platforms with a loan gateway and multi-lender integrations (Cashe, Zype); lifted performance by 35% (90+ Lighthouse) and cut merchant onboarding time by 40%.
+
+## Selected Projects
+- CBVI — Unified case-management platform for a U.S. violence-intervention nonprofit; real-time dashboards, multi-stage intake, audit trails (React, Node.js, Socket.IO, AWS S3, MongoDB). https://cbvi-web.vercel.app/login
+- Kriya — Standup & task-management product; multi-status workflows, Jira integration, Razorpay subscriptions (React, Node.js, MongoDB). https://kriya.xoft.in/login
+- EStyleWala — Vendor commerce dashboard wired to Shiprocket for real-time tracking (React, Shiprocket API, Node.js). https://vendor.estylewala.com
+- StudyRevise — Multi-document AI study platform with citation-grounded Q&A across multiple LLM providers (Next.js, Tailwind, Multi-LLM).
+- Ikhlaas — Offline-first cross-platform habit app: tasks, prayer times, Hijri calendar, Quran/Hadith (React Native, Expo).
+
+## Links
+- Website: https://waleedbahakim.com
+- GitHub: https://github.com/waleedbahakim
+- LinkedIn: https://www.linkedin.com/in/waleed-bahakim-890381227
+- Email: bahakimwaleed08@gmail.com
