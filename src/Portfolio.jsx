@@ -110,11 +110,12 @@ const PROJECTS = [
 ];
 
 const STACK = [
-  { group: "Frontend", items: ["React", "Next.js", "TypeScript", "JavaScript", "Redux", "Tailwind CSS"] },
-  { group: "Backend", items: ["Node.js", "Express", "REST APIs", "Socket.IO"] },
-  { group: "Data & Cloud", items: ["MongoDB", "AWS S3", "Docker", "Vercel"] },
-  { group: "AI", items: ["GenAI", "LLM integration", "OpenAI", "Gemini"] },
-  { group: "Tooling", items: ["Git", "GitHub", "Postman", "Figma"] },
+  { group: "Frontend", items: ["React", "Next.js", "TypeScript", "JavaScript", "Redux", "Zustand", "React Query", "Tailwind CSS", "Vite"] },
+  { group: "Backend", items: ["Node.js", "NestJS", "Express", "REST APIs", "WebSockets", "Socket.IO"] },
+  { group: "Data & Cloud", items: ["MongoDB", "Redis", "AWS S3", "GCP", "Firebase", "Docker", "Vercel"] },
+  { group: "AI", items: ["GenAI", "LLM integration", "OpenAI", "Gemini", "Claude", "Whisper", "MCP"] },
+  { group: "Mobile", items: ["React Native", "Expo", "Flutter", "Dart (intermediate)"] },
+  { group: "Tooling", items: ["Git", "GitHub", "Jest", "Postman", "Figma"] },
 ];
 
 // --- styles --------------------------------------------------------------

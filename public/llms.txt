@@ -12,7 +12,7 @@
 - Languages: English, Hindi, Urdu
 
 ## Skills
-React, Next.js, TypeScript, JavaScript, Redux, Tailwind CSS, Node.js, Express, REST APIs, Socket.IO, MongoDB, MySQL, JWT, AWS, Docker, GCP, Firebase, CI/CD, GenAI, LLM integration (OpenAI, Gemini), Vision AI, prompt engineering, React Native, Expo, Flutter.
+React, Next.js, TypeScript, JavaScript, Redux, Zustand, TanStack React Query, Tailwind CSS, Vite, Node.js, NestJS, Express, REST APIs, WebSockets, Socket.IO, MongoDB, MySQL, Redis, JWT, AWS, GCP, Firebase, Docker, CI/CD, GenAI, LLM integration (OpenAI, Gemini, Claude), Whisper (speech-to-text), MCP (Model Context Protocol), Vision AI, prompt engineering, React Native, Expo, Flutter, Dart, Jest.
 
 ## Experience
 - Fika AI Research — Full-Stack Developer (Jul 2025 – Present): builds client-facing dashboards and automation systems end to end (CallQC.AI, ConvergeIQ, ConsignFlow); integrates AI/LLM and Vision-AI services (OpenAI, Gemini); ships cloud-native apps on AWS with Docker.
